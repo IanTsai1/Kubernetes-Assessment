@@ -19,13 +19,15 @@ package controller
 import (
 	"context"
 
+	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-	appsv1 "k8s.io/api/apps/v1"
 
 	cachev1alpha1 "github.com/example/memcached-operator/api/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // SecretReconciler reconciles a Secret object
@@ -53,15 +55,17 @@ func (r *SecretReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	// TODO(user): your logic here
 
 	//get instance
-	secret-instance := &cachev1alpha1.Secret{}
+	secret_instance := &cachev1alpha1.Secret{}
 
 	//update secret based on fetched data
 	secret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      secret-instance.Name,
-			Namespace: secret-instance.Namespace,
+			Name:      secret_instance.Name,
+			Namespace: secret_instance.Namespace,
 		},
-		StringData: secret-instance.Spec.SecretData,
+		StringData: map[string]string{
+			"yourKey": secret_instance.Spec.SecretData,
+		},
 	}
 
 	if err := r.CreateOrUpdateSecret(ctx, secret); err != nil {
@@ -79,19 +83,19 @@ func (r *SecretReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *ManagedSecretReconciler) CreateOrUpdateSecret(ctx context.Context, secret *corev1.Secret) error {
+func (r *SecretReconciler) CreateOrUpdateSecret(ctx context.Context, secret *corev1.Secret) error {
 	foundSecret := &corev1.Secret{}
-	err := r.Get(ctx, types.NamespacedName{Name: secret.Name, Namespace: secret.Namespace}, foundSecret)
+	//get current state of secret
+	err := r.Get(ctx,types.NamespacedName{Name: secret.Name, Namespace: secret.Namespace}, foundSecret)
 
+	//secret does not exist, create it
 	if err != nil && errors.IsNotFound(err) {
-		// Secret does not exist, create it
-		return r.Create(ctx, secret)
+		return r.Create(ctx, secret) //create
 	} else if err != nil {
-		// Error other than not found, requeue the request
 		return err
 	}
 
-	// Secret exists, update it
+	//secret exists so we update it
 	foundSecret.StringData = secret.StringData
-	return r.Update(ctx, foundSecret)
+	return r.Update(ctx, foundSecret) //update
 }

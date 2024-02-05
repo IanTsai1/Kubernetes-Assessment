@@ -44,7 +44,7 @@ type SecretStatus struct {
 //+kubebuilder:subresource:status
 
 // Secret is the Schema for the secrets API
-//+kubebuilder:subresource:status
+// +kubebuilder:subresource:status
 type Secret struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
