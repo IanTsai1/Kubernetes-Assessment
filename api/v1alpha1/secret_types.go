@@ -29,19 +29,22 @@ type SecretSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Foo is an example field of Secret. Edit secret_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	SecretData       string `json:"secretData,omitempty"`
+	TargetNamespaces string `json:"targetNamespaces,omitempty"`
 }
 
 // SecretStatus defines the observed state of Secret
 type SecretStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type" protobuf:"bytes,1,rep,name=conditions"`
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
 // Secret is the Schema for the secrets API
+//+kubebuilder:subresource:status
 type Secret struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

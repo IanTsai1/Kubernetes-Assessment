@@ -1,0 +1,7 @@
+apiVersion: "secret.com/v1"
+kind: ManagedSecret
+metadata:
+  name: secret-object
+spec:
+  namespace: "development"
+  secret: "iantsai"
